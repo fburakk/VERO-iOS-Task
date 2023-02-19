@@ -13,9 +13,11 @@
 		679EE20329A2D8A9009EAA7D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 679EE20129A2D8A9009EAA7D /* Main.storyboard */; };
 		679EE20529A2D8AA009EAA7D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 679EE20429A2D8AA009EAA7D /* Assets.xcassets */; };
 		679EE20829A2D8AA009EAA7D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 679EE20629A2D8AA009EAA7D /* LaunchScreen.storyboard */; };
+		FBF3AE9A92629223AE43FAD5 /* Pods_VERO_iOS_Task.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4ED5B6FEB940DABBB5533AC /* Pods_VERO_iOS_Task.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3C27D7C6256329D111FC570E /* Pods-VERO-iOS-Task.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VERO-iOS-Task.debug.xcconfig"; path = "Target Support Files/Pods-VERO-iOS-Task/Pods-VERO-iOS-Task.debug.xcconfig"; sourceTree = "<group>"; };
 		679EE1F829A2D8A9009EAA7D /* VERO-iOS-Task.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "VERO-iOS-Task.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		679EE1FB29A2D8A9009EAA7D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		679EE1FD29A2D8A9009EAA7D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -24,6 +26,8 @@
 		679EE20429A2D8AA009EAA7D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		679EE20729A2D8AA009EAA7D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		679EE20929A2D8AA009EAA7D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BF93F83106DF8AC45B04889A /* Pods-VERO-iOS-Task.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VERO-iOS-Task.release.xcconfig"; path = "Target Support Files/Pods-VERO-iOS-Task/Pods-VERO-iOS-Task.release.xcconfig"; sourceTree = "<group>"; };
+		D4ED5B6FEB940DABBB5533AC /* Pods_VERO_iOS_Task.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_VERO_iOS_Task.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,17 +35,38 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FBF3AE9A92629223AE43FAD5 /* Pods_VERO_iOS_Task.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0147096F7EFCABA6C3404347 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D4ED5B6FEB940DABBB5533AC /* Pods_VERO_iOS_Task.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		333484ABEE79F2899476EDD5 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				3C27D7C6256329D111FC570E /* Pods-VERO-iOS-Task.debug.xcconfig */,
+				BF93F83106DF8AC45B04889A /* Pods-VERO-iOS-Task.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		679EE1EF29A2D8A9009EAA7D = {
 			isa = PBXGroup;
 			children = (
 				679EE1FA29A2D8A9009EAA7D /* VERO-iOS-Task */,
 				679EE1F929A2D8A9009EAA7D /* Products */,
+				333484ABEE79F2899476EDD5 /* Pods */,
+				0147096F7EFCABA6C3404347 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -74,9 +99,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 679EE20C29A2D8AA009EAA7D /* Build configuration list for PBXNativeTarget "VERO-iOS-Task" */;
 			buildPhases = (
+				A5FE62F0A96B55B13004838C /* [CP] Check Pods Manifest.lock */,
 				679EE1F429A2D8A9009EAA7D /* Sources */,
 				679EE1F529A2D8A9009EAA7D /* Frameworks */,
 				679EE1F629A2D8A9009EAA7D /* Resources */,
+				9037C51E3E77E68F7B04B4BF /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -132,6 +159,48 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		9037C51E3E77E68F7B04B4BF /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-VERO-iOS-Task/Pods-VERO-iOS-Task-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-VERO-iOS-Task/Pods-VERO-iOS-Task-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-VERO-iOS-Task/Pods-VERO-iOS-Task-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A5FE62F0A96B55B13004838C /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-VERO-iOS-Task-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		679EE1F429A2D8A9009EAA7D /* Sources */ = {
@@ -282,6 +351,7 @@
 		};
 		679EE20D29A2D8AA009EAA7D /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3C27D7C6256329D111FC570E /* Pods-VERO-iOS-Task.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -310,6 +380,7 @@
 		};
 		679EE20E29A2D8AA009EAA7D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BF93F83106DF8AC45B04889A /* Pods-VERO-iOS-Task.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
