@@ -15,6 +15,7 @@
 		679EE20829A2D8AA009EAA7D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 679EE20629A2D8AA009EAA7D /* LaunchScreen.storyboard */; };
 		679EE21029A2DAD6009EAA7D /* WebManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 679EE20F29A2DAD6009EAA7D /* WebManager.swift */; };
 		679EE21229A2DB0F009EAA7D /* URLManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 679EE21129A2DB0F009EAA7D /* URLManager.swift */; };
+		679EE21429A2DBAE009EAA7D /* OauthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 679EE21329A2DBAE009EAA7D /* OauthManager.swift */; };
 		FBF3AE9A92629223AE43FAD5 /* Pods_VERO_iOS_Task.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4ED5B6FEB940DABBB5533AC /* Pods_VERO_iOS_Task.framework */; };
 /* End PBXBuildFile section */
 
@@ -30,6 +31,7 @@
 		679EE20929A2D8AA009EAA7D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		679EE20F29A2DAD6009EAA7D /* WebManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebManager.swift; sourceTree = "<group>"; };
 		679EE21129A2DB0F009EAA7D /* URLManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLManager.swift; sourceTree = "<group>"; };
+		679EE21329A2DBAE009EAA7D /* OauthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OauthManager.swift; sourceTree = "<group>"; };
 		BF93F83106DF8AC45B04889A /* Pods-VERO-iOS-Task.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VERO-iOS-Task.release.xcconfig"; path = "Target Support Files/Pods-VERO-iOS-Task/Pods-VERO-iOS-Task.release.xcconfig"; sourceTree = "<group>"; };
 		D4ED5B6FEB940DABBB5533AC /* Pods_VERO_iOS_Task.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_VERO_iOS_Task.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -89,6 +91,7 @@
 				679EE1FF29A2D8A9009EAA7D /* ViewController.swift */,
 				679EE20F29A2DAD6009EAA7D /* WebManager.swift */,
 				679EE21129A2DB0F009EAA7D /* URLManager.swift */,
+				679EE21329A2DBAE009EAA7D /* OauthManager.swift */,
 				679EE20129A2D8A9009EAA7D /* Main.storyboard */,
 				679EE20429A2D8AA009EAA7D /* Assets.xcassets */,
 				679EE20629A2D8AA009EAA7D /* LaunchScreen.storyboard */,
@@ -215,6 +218,7 @@
 				679EE21029A2DAD6009EAA7D /* WebManager.swift in Sources */,
 				679EE20029A2D8A9009EAA7D /* ViewController.swift in Sources */,
 				679EE1FC29A2D8A9009EAA7D /* AppDelegate.swift in Sources */,
+				679EE21429A2DBAE009EAA7D /* OauthManager.swift in Sources */,
 				679EE21229A2DB0F009EAA7D /* URLManager.swift in Sources */,
 				679EE1FE29A2D8A9009EAA7D /* SceneDelegate.swift in Sources */,
 			);
