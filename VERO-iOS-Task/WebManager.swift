@@ -20,5 +20,21 @@ class WebManager {
                 completion(response)
             }
     }
+    
+    func fetchData(onSucces: @escaping ([Task]) -> Void, onFailure: @escaping (String) -> Void) {
+        OauthManager.shared.isTokenValid { token in
+            print(token)
+            
+            self.makeRequest(endpoint: EndpointCases.getTask(token: token), Type: [Task].self) { response in
+                
+                switch response.result {
+                case .success(let workers):
+                    onSucces(workers)
+                case .failure(let error):
+                    onFailure(error.localizedDescription)
+                }
+            }
+        }
+    }
 }
 
