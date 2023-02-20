@@ -15,6 +15,7 @@ struct LoginResponse: Codable {
 
 struct Oauth: Codable {
     var access_token: String
+    var expires_in: Int
 }
 
 class OauthManager {
@@ -25,15 +26,17 @@ class OauthManager {
     
     func isTokenValid(completion: @escaping (String) -> Void) {
         
-        let currentToken = getCurrentToken()
-        
-        WebManager.shared.makeRequest(endpoint: EndpointCases.getTask(token: currentToken), Type: LoginResponse.self) { response in
-            if response.response?.statusCode == 200 {
-                completion(currentToken)
-            }else if response.response?.statusCode == 401 {
-                self.refreshToken { newToken in
+        if let expireDate = UserDefaults.standard.object(forKey: "expire") as? Date {
+            if Date() < expireDate {
+                completion(getCurrentToken())
+            } else {
+                refreshToken { newToken in
                     completion(newToken)
                 }
+            }
+        }else {
+            refreshToken { newToken in
+                completion(newToken)
             }
         }
     }
@@ -55,6 +58,7 @@ class OauthManager {
                 completion(oauthResponse.oauth.access_token)
                 
                 UserDefaults.standard.set(oauthResponse.oauth.access_token, forKey: "token")
+                UserDefaults.standard.set(Date().addingTimeInterval(1200), forKey: "expire")
                 
             case .failure(let error):
                 print(error.localizedDescription)
