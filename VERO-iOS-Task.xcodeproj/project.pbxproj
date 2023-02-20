@@ -7,9 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6772B2ED29A3AEFC00BBFDA1 /* HomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6772B2EC29A3AEFC00BBFDA1 /* HomeVC.swift */; };
+		6772B2F029A3B0E900BBFDA1 /* TaskTableViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6772B2EF29A3B0E900BBFDA1 /* TaskTableViewModel.swift */; };
+		6772B2F229A3B17C00BBFDA1 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6772B2F129A3B17C00BBFDA1 /* Constants.swift */; };
+		6772B2F529A3B22300BBFDA1 /* TaskCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6772B2F429A3B22300BBFDA1 /* TaskCell.swift */; };
+		6772B2F829A3B56D00BBFDA1 /* HexColor + Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6772B2F729A3B56D00BBFDA1 /* HexColor + Extension.swift */; };
 		679EE1FC29A2D8A9009EAA7D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 679EE1FB29A2D8A9009EAA7D /* AppDelegate.swift */; };
 		679EE1FE29A2D8A9009EAA7D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 679EE1FD29A2D8A9009EAA7D /* SceneDelegate.swift */; };
-		679EE20029A2D8A9009EAA7D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 679EE1FF29A2D8A9009EAA7D /* ViewController.swift */; };
 		679EE20329A2D8A9009EAA7D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 679EE20129A2D8A9009EAA7D /* Main.storyboard */; };
 		679EE20529A2D8AA009EAA7D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 679EE20429A2D8AA009EAA7D /* Assets.xcassets */; };
 		679EE20829A2D8AA009EAA7D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 679EE20629A2D8AA009EAA7D /* LaunchScreen.storyboard */; };
@@ -22,10 +26,14 @@
 
 /* Begin PBXFileReference section */
 		3C27D7C6256329D111FC570E /* Pods-VERO-iOS-Task.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VERO-iOS-Task.debug.xcconfig"; path = "Target Support Files/Pods-VERO-iOS-Task/Pods-VERO-iOS-Task.debug.xcconfig"; sourceTree = "<group>"; };
+		6772B2EC29A3AEFC00BBFDA1 /* HomeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeVC.swift; sourceTree = "<group>"; };
+		6772B2EF29A3B0E900BBFDA1 /* TaskTableViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskTableViewModel.swift; sourceTree = "<group>"; };
+		6772B2F129A3B17C00BBFDA1 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		6772B2F429A3B22300BBFDA1 /* TaskCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskCell.swift; sourceTree = "<group>"; };
+		6772B2F729A3B56D00BBFDA1 /* HexColor + Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HexColor + Extension.swift"; sourceTree = "<group>"; };
 		679EE1F829A2D8A9009EAA7D /* VERO-iOS-Task.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "VERO-iOS-Task.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		679EE1FB29A2D8A9009EAA7D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		679EE1FD29A2D8A9009EAA7D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		679EE1FF29A2D8A9009EAA7D /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		679EE20229A2D8A9009EAA7D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		679EE20429A2D8AA009EAA7D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		679EE20729A2D8AA009EAA7D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -67,6 +75,66 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		6772B2E829A3AD2500BBFDA1 /* System */ = {
+			isa = PBXGroup;
+			children = (
+				679EE1FB29A2D8A9009EAA7D /* AppDelegate.swift */,
+				679EE1FD29A2D8A9009EAA7D /* SceneDelegate.swift */,
+			);
+			path = System;
+			sourceTree = "<group>";
+		};
+		6772B2E929A3AD3400BBFDA1 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				6772B2EC29A3AEFC00BBFDA1 /* HomeVC.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		6772B2EA29A3AD4200BBFDA1 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				679EE21529A2DCF4009EAA7D /* Task.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		6772B2EB29A3AD4D00BBFDA1 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				679EE21129A2DB0F009EAA7D /* URLManager.swift */,
+				679EE20F29A2DAD6009EAA7D /* WebManager.swift */,
+				679EE21329A2DBAE009EAA7D /* OauthManager.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		6772B2EE29A3B0B700BBFDA1 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				6772B2EF29A3B0E900BBFDA1 /* TaskTableViewModel.swift */,
+				6772B2F329A3B20400BBFDA1 /* Cells */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		6772B2F329A3B20400BBFDA1 /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				6772B2F429A3B22300BBFDA1 /* TaskCell.swift */,
+			);
+			path = Cells;
+			sourceTree = "<group>";
+		};
+		6772B2F629A3B55300BBFDA1 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				6772B2F729A3B56D00BBFDA1 /* HexColor + Extension.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		679EE1EF29A2D8A9009EAA7D = {
 			isa = PBXGroup;
 			children = (
@@ -88,13 +156,13 @@
 		679EE1FA29A2D8A9009EAA7D /* VERO-iOS-Task */ = {
 			isa = PBXGroup;
 			children = (
-				679EE1FB29A2D8A9009EAA7D /* AppDelegate.swift */,
-				679EE1FD29A2D8A9009EAA7D /* SceneDelegate.swift */,
-				679EE1FF29A2D8A9009EAA7D /* ViewController.swift */,
-				679EE20F29A2DAD6009EAA7D /* WebManager.swift */,
-				679EE21529A2DCF4009EAA7D /* Task.swift */,
-				679EE21129A2DB0F009EAA7D /* URLManager.swift */,
-				679EE21329A2DBAE009EAA7D /* OauthManager.swift */,
+				6772B2F129A3B17C00BBFDA1 /* Constants.swift */,
+				6772B2E829A3AD2500BBFDA1 /* System */,
+				6772B2EA29A3AD4200BBFDA1 /* Models */,
+				6772B2EE29A3B0B700BBFDA1 /* ViewModels */,
+				6772B2EB29A3AD4D00BBFDA1 /* Managers */,
+				6772B2E929A3AD3400BBFDA1 /* Controllers */,
+				6772B2F629A3B55300BBFDA1 /* Extensions */,
 				679EE20129A2D8A9009EAA7D /* Main.storyboard */,
 				679EE20429A2D8AA009EAA7D /* Assets.xcassets */,
 				679EE20629A2D8AA009EAA7D /* LaunchScreen.storyboard */,
@@ -219,12 +287,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				679EE21029A2DAD6009EAA7D /* WebManager.swift in Sources */,
-				679EE20029A2D8A9009EAA7D /* ViewController.swift in Sources */,
+				6772B2ED29A3AEFC00BBFDA1 /* HomeVC.swift in Sources */,
 				679EE1FC29A2D8A9009EAA7D /* AppDelegate.swift in Sources */,
 				679EE21429A2DBAE009EAA7D /* OauthManager.swift in Sources */,
+				6772B2F529A3B22300BBFDA1 /* TaskCell.swift in Sources */,
+				6772B2F029A3B0E900BBFDA1 /* TaskTableViewModel.swift in Sources */,
 				679EE21229A2DB0F009EAA7D /* URLManager.swift in Sources */,
+				6772B2F829A3B56D00BBFDA1 /* HexColor + Extension.swift in Sources */,
 				679EE21629A2DCF4009EAA7D /* Task.swift in Sources */,
 				679EE1FE29A2D8A9009EAA7D /* SceneDelegate.swift in Sources */,
+				6772B2F229A3B17C00BBFDA1 /* Constants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
