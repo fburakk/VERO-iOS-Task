@@ -37,7 +37,7 @@ struct Section {
     std::vector<size_t> indices;
 };
 
-using SectionedResultsNotificatonCallback = util::UniqueFunction<void(SectionedResultsChangeSet, std::exception_ptr)>;
+using SectionedResultsNotificatonCallback = util::UniqueFunction<void(SectionedResultsChangeSet)>;
 
 /**
  * An instance of ResultsSection gives access to elements in the underlying collection that belong to a given section
@@ -81,7 +81,7 @@ public:
      * callback via `remove_callback`.
      */
     NotificationToken add_notification_callback(SectionedResultsNotificatonCallback callback,
-                                                KeyPathArray key_path_array = {}) &;
+                                                std::optional<KeyPathArray> key_path_array = std::nullopt) &;
 
     bool is_valid() const;
 
@@ -139,7 +139,7 @@ public:
      * callback via `remove_callback`.
      */
     NotificationToken add_notification_callback(SectionedResultsNotificatonCallback callback,
-                                                KeyPathArray key_path_array = {}) &;
+                                                std::optional<KeyPathArray> key_path_array = std::nullopt) &;
 
     /// Return a new instance of SectionedResults that uses a snapshot of the underlying `Results`.
     /// The section key callback parameter will never be invoked.
@@ -172,7 +172,7 @@ private:
     SectionedResults(Results&& results, std::map<Mixed, Section>&& sections,
                      std::map<size_t, Mixed>&& current_section_index_to_key_lookup,
                      std::list<std::string>&& current_str_buffers)
-        : has_performed_initial_evalutation(true)
+        : m_has_performed_initial_evalutation(true)
         , m_results(std::move(results))
         , m_sections(std::move(sections))
         , m_current_section_index_to_key_lookup(std::move(current_section_index_to_key_lookup))
@@ -185,10 +185,10 @@ private:
     SectionedResults copy(Results&&) REQUIRES(!m_mutex);
     void calculate_sections_if_required() REQUIRES(m_mutex);
     void calculate_sections() REQUIRES(m_mutex);
-    bool has_performed_initial_evalutation = false;
-    NotificationToken add_notification_callback_for_section(Mixed section_key,
-                                                            SectionedResultsNotificatonCallback callback,
-                                                            KeyPathArray key_path_array = {});
+    bool m_has_performed_initial_evalutation = false;
+    NotificationToken
+    add_notification_callback_for_section(Mixed section_key, SectionedResultsNotificatonCallback callback,
+                                          std::optional<KeyPathArray> key_path_array = std::nullopt);
 
     friend class realm::ResultsSection;
     Results m_results;

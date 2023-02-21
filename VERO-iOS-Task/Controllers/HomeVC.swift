@@ -11,6 +11,7 @@ class HomeVC: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
     private let taskTableViewModel = TaskTableViewModel()
+    private let realmViewModel = RealmViewModel()
     
     @IBOutlet weak var searchBar: UISearchBar!
     
@@ -28,6 +29,7 @@ class HomeVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         showActivityIndicator()
         fetchData()
+        
     }
     
     func delegation() {
@@ -36,7 +38,9 @@ class HomeVC: UIViewController {
     }
     
     func fetchData() {
+        realmViewModel.deleteData()
         WebManager.shared.fetchData { [self] tasks in
+            realmViewModel.saveData(offlineTask: OfflineTask().fetchFromTaskModel(sourceArray: tasks))
             taskArray = tasks
             
             taskTableViewModel.update(with: tasks)

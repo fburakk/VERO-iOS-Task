@@ -104,6 +104,7 @@ struct RealmConfig {
 
     bool in_memory = false;
     SchemaMode schema_mode = SchemaMode::Automatic;
+    SchemaSubsetMode schema_subset_mode = SchemaSubsetMode::Strict;
 
     // Optional schema for the file.
     // If the schema and schema version are supplied, update_schema() is
@@ -136,9 +137,6 @@ struct RealmConfig {
         return schema_mode == SchemaMode::ReadOnly;
     }
 
-    // The following are intended for internal/testing purposes and
-    // should not be publicly exposed in binding APIs
-
     // If false, always return a new Realm instance, and don't return
     // that Realm instance for other requests for a cached Realm. Useful
     // for dynamic Realms and for tests that need multiple instances on
@@ -149,11 +147,6 @@ struct RealmConfig {
     // format. Used by the browser to warn the user that it'll modify
     // the file.
     bool disable_format_upgrade = false;
-    // Disable the background worker thread for producing change
-    // notifications. Useful for tests for those notifications so that
-    // everything can be done deterministically on one thread, and
-    // speeds up tests that don't need notifications.
-    bool automatic_change_notifications = true;
 
     // The Scheduler which this Realm should be bound to. If not supplied,
     // a default one for the current thread will be used.
@@ -175,6 +168,19 @@ struct RealmConfig {
 
     // Disable automatic backup at file format upgrade by setting to false
     bool backup_at_file_format_change = true;
+
+    // By default converting a top-level table to embedded will fail if there
+    // are any objects without exactly one incoming link. Enabling this makes
+    // it instead delete orphans and duplicate objects with multiple incoming links.
+    bool automatically_handle_backlinks_in_migrations = false;
+
+    // Only for internal testing. Not to be exposed by SDKs.
+    //
+    // Disable the background worker thread for producing change
+    // notifications. Useful for tests for those notifications so that
+    // everything can be done deterministically on one thread, and
+    // speeds up tests that don't need notifications.
+    bool automatic_change_notifications = true;
 };
 
 class Realm : public std::enable_shared_from_this<Realm> {
@@ -237,7 +243,6 @@ public:
     {
         return m_schema_version;
     }
-
 
     void begin_transaction();
     void commit_transaction();
@@ -320,6 +325,8 @@ public:
     // Get the version of the current read or frozen transaction, or `none` if the Realm
     // is not in a read transaction
     util::Optional<VersionID> current_transaction_version() const;
+    // Get the version of the latest snapshot
+    util::Optional<DB::version_type> latest_snapshot_version() const;
 
     TransactionRef duplicate() const;
 
@@ -421,9 +428,6 @@ public:
      */
     static void delete_files(const std::string& realm_file_path, bool* did_delete_realm = nullptr);
 
-    // returns the file format version upgraded from if an upgrade took place
-    util::Optional<int> file_format_upgraded_from_version() const;
-
     bool has_pending_async_work() const;
 
     Realm(const Realm&) = delete;
@@ -467,6 +471,11 @@ public:
         static void run_writes(Realm& realm)
         {
             realm.run_writes();
+        }
+
+        static void copy_schema(Realm& target_realm, const Realm& source_realm)
+        {
+            target_realm.copy_schema_from(source_realm);
         }
 
         // CollectionNotifier needs to be able to access the owning
@@ -548,6 +557,7 @@ private:
     void cache_new_schema();
     void translate_schema_error();
     void notify_schema_changed();
+    void copy_schema_from(const Realm&);
 
     Transaction& transaction();
     Transaction& transaction() const;

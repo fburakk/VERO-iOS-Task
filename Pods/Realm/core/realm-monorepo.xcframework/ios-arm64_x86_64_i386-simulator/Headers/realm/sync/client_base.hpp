@@ -4,6 +4,7 @@
 #include <realm/transaction.hpp>
 #include <realm/sync/config.hpp>
 #include <realm/sync/protocol.hpp>
+#include <realm/sync/socket_provider.hpp>
 #include <realm/util/functional.hpp>
 
 namespace realm::sync {
@@ -61,9 +62,8 @@ struct ClientReset {
     realm::ClientResyncMode mode;
     DBRef fresh_copy;
     bool recovery_is_allowed = true;
-    util::UniqueFunction<void(std::string path)> notify_before_client_reset;
-    util::UniqueFunction<void(std::string path, VersionID before_version, bool did_recover)>
-        notify_after_client_reset;
+    util::UniqueFunction<void(VersionID)> notify_before_client_reset;
+    util::UniqueFunction<void(VersionID before_version, bool did_recover)> notify_after_client_reset;
 };
 
 /// \brief Protocol errors discovered by the client.
@@ -133,47 +133,17 @@ static constexpr milliseconds_type default_fast_reconnect_limit = 60000;    // 1
 using RoundtripTimeHandler = void(milliseconds_type roundtrip_time);
 
 struct ClientConfig {
-    /// An optional custom platform description to be sent to server as part
-    /// of a user agent description (HTTP `User-Agent` header).
-    ///
-    /// If left empty, the platform description will be whatever is returned
-    /// by util::get_platform_info().
-    std::string user_agent_platform_info;
-
-    /// Optional information about the application to be added to the user
-    /// agent description as sent to the server. The intention is that the
-    /// application describes itself using the following (rough) syntax:
-    ///
-    ///     <application info>  ::=  (<space> <layer>)*
-    ///     <layer>             ::=  <name> "/" <version> [<space> <details>]
-    ///     <name>              ::=  (<alnum>)+
-    ///     <version>           ::=  <digit> (<alnum> | "." | "-" | "_")*
-    ///     <details>           ::=  <parentherized>
-    ///     <parentherized>     ::=  "(" (<nonpar> | <parentherized>)* ")"
-    ///
-    /// Where `<space>` is a single space character, `<digit>` is a decimal
-    /// digit, `<alnum>` is any alphanumeric character, and `<nonpar>` is
-    /// any character other than `(` and `)`.
-    ///
-    /// When multiple levels are present, the innermost layer (the one that
-    /// is closest to this API) should appear first.
-    ///
-    /// Example:
-    ///
-    ///     RealmJS/2.13.0 RealmStudio/2.9.0
-    ///
-    /// Note: The user agent description is not intended for machine
-    /// interpretation, but should still follow the specified syntax such
-    /// that it remains easily interpretable by human beings.
-    std::string user_agent_application_info;
-
     /// An optional logger to be used by the client. If no logger is
     /// specified, the client will use an instance of util::StderrLogger
     /// with the log level threshold set to util::Logger::Level::info. The
     /// client does not require a thread-safe logger, and it guarantees that
     /// all logging happens either on behalf of the constructor or on behalf
     /// of the invocation of run().
-    util::Logger* logger = nullptr;
+    std::shared_ptr<util::Logger> logger;
+
+    // The SyncSocket instance used by the Sync Client for event synchronization
+    // and creating WebSockets. If not provided the default implementation will be used.
+    std::shared_ptr<sync::SyncSocketProvider> socket_provider;
 
     /// Use ports 80 and 443 by default instead of 7800 and 7801
     /// respectively. Ideally, these default ports should have been made
@@ -291,6 +261,14 @@ struct ClientConfig {
     ///
     /// Testing/debugging feature. Should never be enabled in production.
     bool disable_sync_to_disk = false;
+
+    /// The sync client supports tables without primary keys by synthesizing a
+    /// pk using the client file ident, which means that all changesets waiting
+    /// to be uploaded need to be rewritten with the correct ident the first time
+    /// we connect to the server. The modern server doesn't support this and
+    /// requires pks for all tables, so this is now only applicable to old sync
+    /// tests and so is disabled by default.
+    bool fix_up_object_ids = false;
 };
 
 /// \brief Information about an error causing a session to be temporarily

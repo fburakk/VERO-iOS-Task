@@ -192,6 +192,42 @@ NSUInteger RLMFastEnumerate(NSFastEnumerationState *state,
     return [enumerator countByEnumeratingWithState:state count:len];
 }
 
+@interface RLMArrayHolder : NSObject
+@end
+@implementation RLMArrayHolder {
+    std::unique_ptr<id[]> items;
+}
+
+NSUInteger RLMUnmanagedFastEnumerate(id collection, NSFastEnumerationState *state) {
+    if (state->state != 0) {
+        return 0;
+    }
+
+    // We need to enumerate a copy of the backing array so that it doesn't
+    // reflect changes made during enumeration. This copy has to be autoreleased
+    // (since there's nowhere for us to store a strong reference), and uses
+    // RLMArrayHolder rather than an NSArray because NSArray doesn't guarantee
+    // that it'll use a single contiguous block of memory, and if it doesn't
+    // we'd need to forward multiple calls to this method to the same NSArray,
+    // which would require holding a reference to it somewhere.
+    __autoreleasing RLMArrayHolder *copy = [[RLMArrayHolder alloc] init];
+    copy->items = std::make_unique<id[]>([collection count]);
+
+    NSUInteger i = 0;
+    for (id object in collection) {
+        copy->items[i++] = object;
+    }
+
+    state->itemsPtr = (__unsafe_unretained id *)(void *)copy->items.get();
+    // needs to point to something valid, but the whole point of this is so
+    // that it can't be changed
+    state->mutationsPtr = state->extra;
+    state->state = i;
+
+    return i;
+}
+@end
+
 template<typename Collection>
 NSArray *RLMCollectionValueForKey(Collection& collection, NSString *key, RLMClassInfo& info) {
     size_t count = collection.size();
@@ -384,16 +420,6 @@ static NSArray *toArray(realm::IndexSet const& set) {
     return toArray(_indices.modifications);
 }
 
-static NSArray *toIndexPathArray(realm::IndexSet const& set, NSUInteger section) {
-    NSMutableArray *ret = [NSMutableArray new];
-    NSUInteger path[2] = {section, 0};
-    for (auto index : set.as_indexes()) {
-        path[1] = index;
-        [ret addObject:[NSIndexPath indexPathWithIndexes:path length:2]];
-    }
-    return ret;
-}
-
 - (NSArray<NSIndexPath *> *)deletionsInSection:(NSUInteger)section {
     return toIndexPathArray(_indices.deletions, section);
 }
@@ -419,19 +445,7 @@ struct CollectionCallbackWrapper {
     id collection;
     bool ignoreChangesInInitialNotification;
 
-    void operator()(realm::CollectionChangeSet const& changes, std::exception_ptr err) {
-        if (err) {
-            try {
-                rethrow_exception(err);
-            }
-            catch (...) {
-                NSError *error = nil;
-                RLMRealmTranslateException(&error);
-                block(nil, nil, error);
-                return;
-            }
-        }
-
+    void operator()(realm::CollectionChangeSet const& changes) {
         if (ignoreChangesInInitialNotification) {
             ignoreChangesInInitialNotification = false;
             block(collection, nil, nil);
@@ -479,7 +493,7 @@ RLMNotificationToken *RLMAddNotificationBlock(RLMCollection *collection,
     auto token = [[RLMCancellationToken alloc] init];
     
     RLMClassInfo *info = collection.objectInfo;
-    realm::KeyPathArray keyPathArray = RLMKeyPathArrayFromStringArray(realm, info, keyPaths);
+    auto keyPathArray = RLMKeyPathArrayFromStringArray(realm, info, keyPaths);
 
     if (!queue) {
         [realm verifyNotificationsAreSupported:true];

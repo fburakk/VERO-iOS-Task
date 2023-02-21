@@ -33,6 +33,7 @@
 #include <realm/object-store/shared_realm.hpp>
 
 #include <realm/util/assert.hpp>
+#include <realm/util/optional.hpp>
 #include <realm/table_view.hpp>
 
 #include <string>
@@ -263,7 +264,7 @@ Object Object::create(ContextType& ctx, std::shared_ptr<Realm> const& realm, Obj
     // considered a primary key by core, and so will need to be set.
     bool skip_primary = true;
     // If the input value is missing values for any of the properties we want to
-    // set the propery to the default value for new objects, but leave it
+    // set the property to the default value for new objects, but leave it
     // untouched for existing objects.
     bool created = false;
 

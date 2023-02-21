@@ -270,6 +270,7 @@ public:
     void init(bool from_link_list, size_t nb_values)
     {
         m_from_list = from_link_list;
+        m_sorted = false;
         resize(nb_values);
     }
 
@@ -345,6 +346,13 @@ public:
     {
         return m_first + m_size;
     }
+    void sort()
+    {
+        if (!m_sorted) {
+            std::sort(begin(), end());
+            m_sorted = true;
+        }
+    }
     template <class TOperator>
     REALM_FORCEINLINE void fun_const(const ValueType& const_value, const ValueBase& right)
     {
@@ -408,84 +416,6 @@ public:
         }
     }
 
-    // Optimization for the left hand side being constant
-    template <class TCond>
-    REALM_FORCEINLINE static size_t compare_const(const ValueType& left, ValueBase& right,
-                                                  ExpressionComparisonType comparison)
-    {
-        TCond c;
-        const size_t sz = right.size();
-        if (!right.m_from_list) {
-            // ALL/NONE not supported for non list types
-            REALM_ASSERT_DEBUG(comparison == ExpressionComparisonType::Any);
-            for (size_t m = 0; m < sz; m++) {
-                if (c(left, right[m]))
-                    return m;
-            }
-        }
-        else {
-            for (size_t m = 0; m < sz; m++) {
-                bool match = c(left, right[m]);
-                if (match) {
-                    if (comparison == ExpressionComparisonType::Any) {
-                        return 0;
-                    }
-                    if (comparison == ExpressionComparisonType::None) {
-                        return not_found; // one matched
-                    }
-                }
-                else {
-                    if (comparison == ExpressionComparisonType::All) {
-                        return not_found;
-                    }
-                }
-            }
-            if (comparison == ExpressionComparisonType::None || comparison == ExpressionComparisonType::All) {
-                return 0; // either none or all
-            }
-        }
-        return not_found;
-    }
-
-    // Optimization for the right hand side being constant
-    template <class TCond>
-    REALM_FORCEINLINE static size_t compare_const(ValueBase& left, const ValueType& right,
-                                                  ExpressionComparisonType comparison)
-    {
-        TCond c;
-        const size_t sz = left.size();
-        if (!left.m_from_list) {
-            REALM_ASSERT_DEBUG(comparison ==
-                               ExpressionComparisonType::Any); // ALL/NONE not supported for non list types
-            for (size_t m = 0; m < sz; m++) {
-                if (c(left[m], right))
-                    return m;
-            }
-        }
-        else {
-            for (size_t m = 0; m < sz; m++) {
-                bool match = c(left[m], right);
-                if (match) {
-                    if (comparison == ExpressionComparisonType::Any) {
-                        return 0;
-                    }
-                    if (comparison == ExpressionComparisonType::None) {
-                        return not_found; // one matched
-                    }
-                }
-                else {
-                    if (comparison == ExpressionComparisonType::All) {
-                        return not_found;
-                    }
-                }
-            }
-            if (comparison == ExpressionComparisonType::None || comparison == ExpressionComparisonType::All) {
-                return 0; // either none or all
-            }
-        }
-        return not_found;
-    }
-
     // Given a TCond (==, !=, >, <, >=, <=) and two Value<T>, return index of first match
     template <class TCond>
     REALM_FORCEINLINE static size_t compare(ValueBase& left, ValueBase& right,
@@ -534,8 +464,8 @@ public:
         size_t right_size = right.m_from_list ? right.size() : 1;
 
         if (left_size > 2 && right_size > 2) {
-            std::sort(left.begin(), left.end());
-            std::sort(right.begin(), right.end());
+            left.sort();
+            right.sort();
 
             if constexpr (std::is_same_v<TCond, Equal>) {
                 if (compare_left != ExpressionComparisonType::None && compare_right == Compare::Any) {
@@ -685,6 +615,7 @@ private:
     QueryValue m_cache[prealloc];
     QueryValue* m_first = &m_cache[0];
     size_t m_size = 1;
+    bool m_sorted = false;
 
     void resize(size_t size)
     {
@@ -776,6 +707,11 @@ public:
         return false;
     }
 
+    virtual bool has_single_value() const
+    {
+        return false;
+    }
+
     virtual bool has_multiple_values() const
     {
         return false;
@@ -787,6 +723,11 @@ public:
     }
 
     virtual std::vector<ObjKey> find_all(Mixed) const
+    {
+        return {};
+    }
+
+    virtual ConstTableRef get_target_table() const
     {
         return {};
     }
@@ -1281,14 +1222,36 @@ public:
     {
     }
 
-    std::string value_to_string(size_t ndx) const
+    std::string value_to_string(size_t ndx, util::serializer::SerialisationState& state) const
     {
         auto val = get(ndx);
         if (val.is_null())
             return "NULL";
         else {
+            static_cast<void>(state);
             if constexpr (std::is_same_v<T, TypeOfValue>) {
                 return util::serializer::print_value(val.get_type_of_value());
+            }
+            else if constexpr (std::is_same_v<T, ObjKey>) {
+                ObjKey obj_key = val.template get<ObjKey>();
+                if (state.target_table) {
+                    ObjLink link(state.target_table->get_key(), obj_key);
+                    return util::serializer::print_value(link, state.group);
+                }
+                else {
+                    return util::serializer::print_value(obj_key);
+                }
+            }
+            else if constexpr (std::is_same_v<T, ObjLink>) {
+                return util::serializer::print_value(val.template get<ObjLink>(), state.group);
+            }
+            else if constexpr (std::is_same_v<T, Mixed>) {
+                if (val.is_type(type_TypedLink)) {
+                    return util::serializer::print_value(val.template get<ObjLink>(), state.group);
+                }
+                else {
+                    return util::serializer::print_value(val);
+                }
             }
             else {
                 return util::serializer::print_value(val.template get<T>());
@@ -1305,13 +1268,13 @@ public:
                 if (i != 0) {
                     desc += ", ";
                 }
-                desc += value_to_string(i);
+                desc += value_to_string(i, state);
             }
             desc += "}";
             return desc;
         }
         else if (sz == 1) {
-            return value_to_string(0);
+            return value_to_string(0, state);
         }
         return "";
     }
@@ -1321,9 +1284,14 @@ public:
         return m_from_list;
     }
 
+    bool has_single_value() const override
+    {
+        return size() == 1;
+    }
+
     bool has_constant_evaluation() const override
     {
-        return !m_from_list;
+        return true;
     }
 
     util::Optional<ExpressionComparisonType> get_comparison_type() const final
@@ -1377,6 +1345,38 @@ private:
     }
 
     std::string m_buffer;
+};
+
+class ConstantMixedList : public Value<Mixed> {
+public:
+    ConstantMixedList(size_t nb_values)
+        : Value()
+        , m_buffer(nb_values)
+    {
+        this->init(true, nb_values);
+    }
+    void set(size_t n, Mixed val)
+    {
+        Value<Mixed>::set(n, val);
+        (*this)[n].use_buffer(m_buffer[n]);
+    }
+
+    std::unique_ptr<Subexpr> clone() const override
+    {
+        return std::unique_ptr<Subexpr>(new ConstantMixedList(*this));
+    }
+
+private:
+    ConstantMixedList(const ConstantMixedList& other)
+        : Value(other)
+        , m_buffer(other.size())
+    {
+        for (size_t i = 0; i < size(); i++) {
+            (*this)[i].use_buffer(m_buffer[i]);
+        }
+    }
+
+    std::vector<std::string> m_buffer;
 };
 
 class ConstantStringValue : public Value<StringData> {
@@ -1527,7 +1527,7 @@ The reason we use this map pattern is that we can exit the link-tree-traversal a
 found the first link that points to key '5'. Other solutions could be a std::vector<ColKey> harvest_all_links(), or an
 iterator pattern. First solution can't exit, second solution requires internal state.
 */
-class LinkMap {
+class LinkMap final {
 public:
     LinkMap() = default;
     LinkMap(ConstTableRef table, std::vector<ColKey> columns)
@@ -1591,7 +1591,7 @@ public:
 
     void collect_dependencies(std::vector<TableKey>& tables) const;
 
-    virtual std::string description(util::serializer::SerialisationState& state) const;
+    std::string description(util::serializer::SerialisationState& state) const;
 
     ObjKey get_unary_link_or_not_found(size_t index) const
     {
@@ -1649,6 +1649,8 @@ public:
     {
         return !m_link_column_keys.empty();
     }
+
+    static ref_type get_ref(const ArrayPayload* array_payload, ColumnType type, size_t ndx);
 
 private:
     void map_links(size_t column, ObjKey key, LinkMapFunction& lm) const;
@@ -1733,7 +1735,7 @@ public:
         return m_column_key.get_attrs().test(col_attr_Nullable);
     }
 
-    LinkMap get_link_map() const
+    const LinkMap& get_link_map() const
     {
         return m_link_map;
     }
@@ -1777,7 +1779,7 @@ public:
     bool has_search_index() const final
     {
         auto target_table = m_link_map.get_target_table();
-        return target_table->get_primary_key_column() == m_column_key || target_table->has_search_index(m_column_key);
+        return target_table->search_index_type(m_column_key) == IndexType::General;
     }
 
     std::vector<ObjKey> find_all(Mixed value) const final
@@ -2077,6 +2079,9 @@ public:
         : SimpleQuerySupport(other)
     {
     }
+
+    Query fulltext(StringData sd) const;
+
     using SimpleQuerySupport::size;
 
     // Columns<String> == Columns<String>
@@ -2614,6 +2619,11 @@ public:
         return type_Link;
     }
 
+    ConstTableRef get_target_table() const override
+    {
+        return link_map().get_target_table();
+    }
+
     bool has_multiple_values() const override
     {
         return m_is_list || !m_link_map.only_unary_links();
@@ -2760,6 +2770,10 @@ public:
     ConstTableRef get_base_table() const final
     {
         return m_link_map.get_base_table();
+    }
+    ConstTableRef get_target_table() const override
+    {
+        return m_link_map.get_target_table()->get_opposite_table(m_column_key);
     }
 
     Allocator& get_alloc() const
@@ -3039,7 +3053,6 @@ public:
     ColumnDictionaryKey(ColumnDictionaryKey const& other)
         : Columns<Dictionary>(other)
         , m_prop_list(other.m_prop_list)
-        , m_objkey(other.m_objkey)
     {
         init_key(other.m_key);
     }
@@ -3048,7 +3061,6 @@ private:
     Mixed m_key;
     std::string m_buffer;
     std::vector<std::string> m_prop_list;
-    ObjKey m_objkey;
 
     void init_key(Mixed key_value);
 };
@@ -3325,7 +3337,7 @@ public:
                     const Obj obj = m_columns_collection.m_link_map.get_target_table()->get_object(links[t]);
                     auto dict = obj.get_dictionary(m_columns_collection.m_column_key);
                     if (dict.size() > 0) {
-                        destination.set(t, do_dictionary_agg(*dict.m_clusters));
+                        destination.set(t, do_dictionary_agg(dict));
                     }
                     else {
                         set_value_for_empty_dictionary(destination, t);
@@ -3333,12 +3345,10 @@ public:
                 }
             }
             else {
-                if (m_columns_collection.m_leaf_ptr->get(index)) {
+                if (auto ref = m_columns_collection.m_leaf_ptr->get(index)) {
                     Allocator& alloc = m_columns_collection.get_base_table()->get_alloc();
-                    DictionaryClusterTree dict_cluster(static_cast<Array*>(m_columns_collection.m_leaf_ptr),
-                                                       *m_dictionary_key_type, alloc, index);
-                    dict_cluster.init_from_parent();
-                    destination.set(0, do_dictionary_agg(dict_cluster));
+                    Dictionary dict(alloc, m_columns_collection.m_column_key, to_ref(ref));
+                    destination.set(0, do_dictionary_agg(dict));
                 }
                 else {
                     set_value_for_empty_dictionary(destination, 0);
@@ -3404,19 +3414,19 @@ private:
         }
     }
 
-    Mixed do_dictionary_agg(const DictionaryClusterTree& dict_cluster)
+    Mixed do_dictionary_agg(const Dictionary& dict)
     {
         if constexpr (std::is_same_v<Operation, aggregate_operations::Maximum<Mixed>>) {
-            return dict_cluster.max();
+            return *dict.do_max();
         }
         else if constexpr (std::is_same_v<Operation, aggregate_operations::Minimum<Mixed>>) {
-            return dict_cluster.min();
+            return *dict.do_min();
         }
         else if constexpr (std::is_same_v<Operation, aggregate_operations::Average<Mixed>>) {
-            return dict_cluster.avg(nullptr, get_type());
+            return *dict.do_avg();
         }
         else if constexpr (std::is_same_v<Operation, aggregate_operations::Sum<Mixed>>) {
-            return dict_cluster.sum(nullptr, get_type());
+            return *dict.do_sum();
         }
         REALM_UNREACHABLE();
     }
@@ -3474,8 +3484,13 @@ Query compare(const Subexpr2<Link>& left, null)
 
 template <class T>
 class Columns : public ObjPropertyExpr<T> {
+    constexpr static bool requires_null_column = realm::is_any_v<T, int64_t, bool>;
+
 public:
     using LeafType = typename ColumnTypeTraits<T>::cluster_leaf_type;
+    using NullableLeafType =
+        std::conditional_t<requires_null_column, typename ColumnTypeTraits<util::Optional<T>>::cluster_leaf_type,
+                           LeafType>;
     using ObjPropertyExpr<T>::links_exist;
     using ObjPropertyBase::is_nullable;
 
@@ -3496,6 +3511,12 @@ public:
         m_leaf_ptr = nullptr;
         if (links_exist()) {
             m_link_map.set_cluster(cluster);
+        }
+        else if (requires_null_column && is_nullable()) {
+            // Create new Leaf
+            m_array_ptr = LeafPtr(new (&m_leaf_cache_storage) NullableLeafType(this->get_base_table()->get_alloc()));
+            cluster->init_leaf(m_column_key, m_array_ptr.get());
+            m_leaf_ptr = m_array_ptr.get();
         }
         else {
             // Create new Leaf
@@ -3582,11 +3603,8 @@ public:
     // Load values from Column into destination
     void evaluate(size_t index, ValueBase& destination) override
     {
-        if (is_nullable() && std::is_same_v<typename LeafType::value_type, int64_t>) {
-            evaluate_internal<ArrayIntNull>(index, destination);
-        }
-        else if (is_nullable() && std::is_same_v<typename LeafType::value_type, bool>) {
-            evaluate_internal<ArrayBoolNull>(index, destination);
+        if (is_nullable()) {
+            evaluate_internal<NullableLeafType>(index, destination);
         }
         else {
             evaluate_internal<LeafType>(index, destination);
@@ -3598,11 +3616,8 @@ public:
         destination.init(false, 1);
         auto table = m_link_map.get_target_table();
         auto obj = table.unchecked_ptr()->get_object(key);
-        if (is_nullable() && std::is_same_v<typename LeafType::value_type, int64_t>) {
-            destination.set(0, obj.template get<util::Optional<int64_t>>(m_column_key));
-        }
-        else if (is_nullable() && std::is_same_v<typename LeafType::value_type, bool>) {
-            destination.set(0, obj.template get<util::Optional<bool>>(m_column_key));
+        if (requires_null_column && is_nullable()) {
+            destination.set(0, obj.template get<util::Optional<T>>(m_column_key));
         }
         else {
             destination.set(0, obj.template get<T>(m_column_key));
@@ -3614,7 +3629,8 @@ private:
     using ObjPropertyExpr<T>::m_column_key;
 
     // Leaf cache
-    using LeafCacheStorage = typename std::aligned_storage<sizeof(LeafType), alignof(LeafType)>::type;
+    using LeafCacheStorage =
+        typename std::aligned_storage<std::max(sizeof(LeafType), sizeof(NullableLeafType)), alignof(LeafType)>::type;
     using LeafPtr = std::unique_ptr<ArrayPayload, PlacementDelete>;
     LeafCacheStorage m_leaf_cache_storage;
     LeafPtr m_array_ptr;
@@ -3805,7 +3821,7 @@ public:
 
     virtual std::string description(util::serializer::SerialisationState& state) const override
     {
-        util::serializer::SerialisationState empty_state(state.class_prefix);
+        util::serializer::SerialisationState empty_state(state.group);
         return state.describe_columns(m_link_map, ColKey()) + util::serializer::value_separator +
                Operation::description() + util::serializer::value_separator + m_column.description(empty_state);
     }
@@ -3910,8 +3926,8 @@ public:
         : m_left(std::move(left))
         , m_right(std::move(right))
     {
-        m_left_is_const = m_left->has_constant_evaluation();
-        m_right_is_const = m_right->has_constant_evaluation();
+        m_left_is_const = m_left->has_single_value();
+        m_right_is_const = m_right->has_single_value();
         if (m_left_is_const) {
             m_const_value = m_left->get_mixed();
         }
@@ -4041,15 +4057,13 @@ public:
         : m_left(std::move(left))
         , m_right(std::move(right))
     {
-        m_left_is_const = m_left->has_constant_evaluation();
-        m_right_is_const = m_right->has_constant_evaluation();
-        if (m_left_is_const) {
-            m_const_value = m_left->get_mixed();
+        if (m_left->has_constant_evaluation()) {
+            m_left_const_values = dynamic_cast<ValueBase*>(m_left.get());
         }
-        if (m_right_is_const) {
-            REALM_ASSERT(!m_left_is_const);
-            m_const_value = m_right->get_mixed();
+        if (m_right->has_constant_evaluation()) {
+            m_right_const_values = dynamic_cast<ValueBase*>(m_right.get());
         }
+        REALM_ASSERT(!(m_left_const_values && m_right_const_values));
     }
 
     // See comment in base class
@@ -4073,15 +4087,26 @@ public:
     double init() override
     {
         double dT = 50.0;
-        if (m_left_is_const || m_right_is_const) {
+        if ((m_left->has_single_value()) || (m_right->has_single_value())) {
             dT = 10.0;
             if constexpr (std::is_same_v<TCond, Equal>) {
                 // If the property not being constant has a search index we can speed things up by
                 // finding all matches up front.
-                Subexpr* column = m_left_is_const ? m_right.get() : m_left.get();
+                Mixed const_value;
+                Subexpr* column;
+                if (m_left->has_single_value()) {
+                    const_value = m_left->get_mixed();
+                    column = m_right.get();
+                }
+                else {
+                    const_value = m_right->get_mixed();
+                    column = m_left.get();
+                }
 
-                if (column->has_search_index() && *column->get_comparison_type() == ExpressionComparisonType::Any) {
-                    if (m_const_value.is_null()) {
+                if (column->has_search_index() &&
+                    column->get_comparison_type().value_or(ExpressionComparisonType::Any) ==
+                        ExpressionComparisonType::Any) {
+                    if (const_value.is_null()) {
                         const ObjPropertyBase* prop = dynamic_cast<const ObjPropertyBase*>(m_right.get());
                         // when checking for null across links, null links are considered matches,
                         // so we must compute the slow matching even if there is an index.
@@ -4093,12 +4118,12 @@ public:
                         }
                     }
                     else {
-                        if (column->get_type() != m_const_value.get_type()) {
+                        if (column->get_type() != const_value.get_type()) {
                             // If the type we are looking for is not the same type as the target
                             // column, we cannot use the index
                             return dT;
                         }
-                        m_matches = column->find_all(m_const_value);
+                        m_matches = column->find_all(const_value);
                     }
                     // Sort
                     std::sort(m_matches.begin(), m_matches.end());
@@ -4177,47 +4202,25 @@ public:
         }
 
         size_t match;
-        ValueBase left;
-        ValueBase right;
+        ValueBase left_buf;
+        ValueBase right_buf;
         const util::Optional<ExpressionComparisonType> left_cmp_type = m_left->get_comparison_type();
         const util::Optional<ExpressionComparisonType> right_cmp_type = m_right->get_comparison_type();
-        if (m_left_is_const) {
-            const ExpressionComparisonType right_evaluated_cmp_type =
-                right_cmp_type.value_or(ExpressionComparisonType::Any);
-            for (; start < end;) {
-                m_right->evaluate(start, right);
-                match = ValueBase::compare_const<TCond>(m_const_value, right, right_evaluated_cmp_type);
-                if (match != not_found && match + start < end)
-                    return start + match;
 
-                size_t rows = right.m_from_list ? 1 : right.size();
-                start += rows;
-            }
-        }
-        else if (m_right_is_const) {
-            const ExpressionComparisonType left_evaluated_cmp_type =
-                left_cmp_type.value_or(ExpressionComparisonType::Any);
-            for (; start < end;) {
-                m_left->evaluate(start, left);
-                match = ValueBase::compare_const<TCond>(left, m_const_value, left_evaluated_cmp_type);
-                if (match != not_found && match + start < end)
-                    return start + match;
+        ValueBase* left = m_left_const_values ? m_left_const_values : &left_buf;
+        ValueBase* right = m_right_const_values ? m_right_const_values : &right_buf;
 
-                size_t rows = left.m_from_list ? 1 : left.size();
-                start += rows;
-            }
-        }
-        else {
-            for (; start < end;) {
-                m_left->evaluate(start, left);
-                m_right->evaluate(start, right);
-                match = ValueBase::template compare<TCond>(left, right, left_cmp_type, right_cmp_type);
-                if (match != not_found && match + start < end)
-                    return start + match;
+        for (; start < end;) {
+            if (!m_left_const_values)
+                m_left->evaluate(start, left_buf);
+            if (!m_right_const_values)
+                m_right->evaluate(start, right_buf);
+            match = ValueBase::template compare<TCond>(*left, *right, left_cmp_type, right_cmp_type);
+            if (match != not_found && match + start < end)
+                return start + match;
 
-                size_t rows = (left.m_from_list || right.m_from_list) ? 1 : minimum(right.size(), left.size());
-                start += rows;
-            }
+            size_t rows = (left->m_from_list || right->m_from_list) ? 1 : minimum(right->size(), left->size());
+            start += rows;
         }
 
         return not_found; // no match
@@ -4233,8 +4236,11 @@ public:
                                                  m_left->description(state));
         }
         else {
-            return util::serializer::print_value(m_left->description(state) + " " + TCond::description() + " " +
-                                                 m_right->description(state));
+            state.target_table = m_right->get_target_table();
+            std::string ret = m_left->description(state) + " " + TCond::description() + " ";
+            state.target_table = m_left->get_target_table();
+            ret += m_right->description(state);
+            return ret;
         }
     }
 
@@ -4247,23 +4253,20 @@ private:
     Compare(const Compare& other)
         : m_left(other.m_left->clone())
         , m_right(other.m_right->clone())
-        , m_left_is_const(other.m_left_is_const)
-        , m_right_is_const(other.m_right_is_const)
     {
-        if (m_left_is_const) {
-            m_const_value = m_left->get_mixed();
+        if (m_left->has_constant_evaluation()) {
+            m_left_const_values = dynamic_cast<ValueBase*>(m_left.get());
         }
-        if (m_right_is_const) {
-            m_const_value = m_right->get_mixed();
+        if (m_right->has_constant_evaluation()) {
+            m_right_const_values = dynamic_cast<ValueBase*>(m_right.get());
         }
     }
 
     std::unique_ptr<Subexpr> m_left;
     std::unique_ptr<Subexpr> m_right;
     const Cluster* m_cluster;
-    bool m_left_is_const;
-    bool m_right_is_const;
-    QueryValue m_const_value;
+    ValueBase* m_left_const_values = nullptr;
+    ValueBase* m_right_const_values = nullptr;
     bool m_has_matches = false;
     std::vector<ObjKey> m_matches;
     mutable size_t m_index_get = 0;

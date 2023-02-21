@@ -42,7 +42,7 @@ namespace {
     public:
         CocoaNetworkTransport(id<RLMNetworkTransport> transport) : m_transport(transport) {}
 
-        void send_request_to_server(app::Request&& request,
+        void send_request_to_server(const app::Request& request,
                                     util::UniqueFunction<void(const app::Response&)>&& completion) override {
             // Convert the app::Request to an RLMRequest
             auto rlmRequest = [RLMRequest new];
@@ -128,10 +128,19 @@ namespace {
         self.localAppVersion = localAppVersion;
         self.defaultRequestTimeoutMS = defaultRequestTimeoutMS;
 
-        _config.platform = "Realm Cocoa";
+        _config.device_info.sdk = "Realm Swift";
 
-        RLMNSStringToStdString(_config.platform_version, [[NSProcessInfo processInfo] operatingSystemVersionString]);
-        RLMNSStringToStdString(_config.sdk_version, REALM_COCOA_VERSION);
+        // Platform info isn't available when running via `swift test`.
+        // Non-Xcode SPM builds can't build for anything but macOS, so this is
+        // probably unimportant for now and we can just report "unknown"
+        auto processInfo = [NSProcessInfo processInfo];
+        auto platform = [processInfo.environment[@"RUN_DESTINATION_DEVICE_PLATFORM_IDENTIFIER"]
+                         componentsSeparatedByString:@"."].lastObject;
+        RLMNSStringToStdString(_config.device_info.platform,
+                               platform ?: @"unknown");
+        RLMNSStringToStdString(_config.device_info.platform_version,
+                               [processInfo operatingSystemVersionString] ?: @"unknown");
+        RLMNSStringToStdString(_config.device_info.sdk_version, REALM_COCOA_VERSION);
         return self;
     }
     return nil;
@@ -153,11 +162,14 @@ namespace {
     return nil;
 }
 
+static void setOptionalString(std::optional<std::string>& dst, NSString *src) {
+    std::string tmp;
+    RLMNSStringToStdString(tmp, src);
+    dst = tmp.empty() ? util::none : std::optional(std::move(tmp));
+}
+
 - (void)setBaseURL:(nullable NSString *)baseURL {
-    std::string base_url;
-    RLMNSStringToStdString(base_url, baseURL);
-    _config.base_url = base_url.empty() ? util::none : std::optional(base_url);
-    return;
+    setOptionalString(_config.base_url, baseURL);
 }
 
 - (id<RLMNetworkTransport>)transport {
@@ -180,10 +192,7 @@ namespace {
 }
 
 - (void)setLocalAppName:(nullable NSString *)localAppName {
-    std::string local_app_name;
-    RLMNSStringToStdString(local_app_name, localAppName);
-    _config.local_app_name = local_app_name.empty() ? util::none : std::optional(local_app_name);
-    return;
+    setOptionalString(_config.local_app_name, localAppName);
 }
 
 - (NSString *)localAppVersion {
@@ -195,10 +204,7 @@ namespace {
 }
 
 - (void)setLocalAppVersion:(nullable NSString *)localAppVersion {
-    std::string local_app_version;
-    RLMNSStringToStdString(local_app_version, localAppVersion);
-    _config.local_app_version = local_app_version.empty() ? util::none : std::optional(local_app_version);
-    return;
+    setOptionalString(_config.local_app_version, localAppVersion);
 }
 
 - (NSUInteger)defaultRequestTimeoutMS {
@@ -210,15 +216,6 @@ namespace {
 }
 
 @end
-
-NSError *RLMAppErrorToNSError(realm::app::AppError const& appError) {
-    return [[NSError alloc] initWithDomain:@(appError.error_code.category().name())
-                                      code:appError.error_code.value()
-                                  userInfo:@{
-                                      @(appError.error_code.category().name()) : @(appError.error_code.message().data()),
-                                      NSLocalizedDescriptionKey : @(appError.message.c_str())
-                                  }];
-}
 
 #pragma mark RLMAppSubscriptionToken
 @implementation RLMAppSubscriptionToken {
@@ -397,14 +394,14 @@ static std::mutex& s_appMutex = *new std::mutex();
            if (user) {
                [self.authorizationDelegate authenticationDidCompleteWithUser:user];
            } else {
-               [self.authorizationDelegate authenticationDidCompleteWithError:error];
+               [self.authorizationDelegate authenticationDidFailWithError:error];
            }
        }];
 }
 
 - (void)authorizationController:(__unused ASAuthorizationController *)controller
            didCompleteWithError:(NSError *)error API_AVAILABLE(ios(13.0), macos(10.15), tvos(13.0), watchos(6.0)) {
-    [self.authorizationDelegate authenticationDidCompleteWithError:error];
+    [self.authorizationDelegate authenticationDidFailWithError:error];
 }
 
 - (RLMAppSubscriptionToken *)subscribe:(RLMAppNotificationBlock)block {

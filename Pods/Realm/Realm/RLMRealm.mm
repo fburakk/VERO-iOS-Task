@@ -90,7 +90,9 @@ void RLMWaitForRealmToClose(NSString *path) {
     NSString *lockfilePath = [path stringByAppendingString:@".lock"];
     File lockfile(lockfilePath.UTF8String, File::mode_Update);
     lockfile.set_fifo_path([path stringByAppendingString:@".management"].UTF8String, "lock.fifo");
-    lockfile.lock_exclusive();
+    while (!lockfile.try_rw_lock_exclusive()) {
+        sched_yield();
+    }
 }
 
 BOOL RLMIsRealmCachedAtPath(NSString *path) {
@@ -576,7 +578,8 @@ static std::shared_ptr<realm::util::Scheduler> makeScheduler(dispatch_queue_t qu
                                                              schema:schema.copy
                                                             dynamic:true];
 
-                [[[RLMMigration alloc] initWithRealm:newRealm oldRealm:oldRealm schema:mutableSchema] execute:migrationBlock];
+                [[[RLMMigration alloc] initWithRealm:newRealm oldRealm:oldRealm schema:mutableSchema]
+                 execute:migrationBlock objectClass:configuration.migrationObjectClass];
 
                 oldRealm->_realm = nullptr;
                 newRealm->_realm = nullptr;
@@ -591,10 +594,6 @@ static std::shared_ptr<realm::util::Scheduler> makeScheduler(dispatch_queue_t qu
         }
 
         try {
-            // FIXME: temporary workaround for a core 12.5.0 bug
-            if (config.schema_mode == realm::SchemaMode::ReadOnly) {
-                realm->_realm->update_schema({}, config.schema_version);
-            }
             realm->_realm->update_schema(schema.objectStoreCopy, config.schema_version,
                                          std::move(migrationFunction), std::move(initializationFunction));
         }
