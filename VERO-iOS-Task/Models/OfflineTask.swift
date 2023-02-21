@@ -31,4 +31,14 @@ class OfflineTask: Object {
         }
         return result
     }
+    
+    func pushToTaskModel(sourceArray: [OfflineTask]) -> [Task] {
+        var result = [Task]()
+        
+        for source in sourceArray {
+            let target = Task(task: source.task, title: source.title, description: source.desc, colorCode: source.colorCode)
+            result.append(target)
+        }
+        return result
+    }
 }

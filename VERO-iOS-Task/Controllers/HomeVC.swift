@@ -38,8 +38,9 @@ class HomeVC: UIViewController {
     }
     
     func fetchData() {
-        realmViewModel.deleteData()
+        
         WebManager.shared.fetchData { [self] tasks in
+            realmViewModel.deleteData()
             realmViewModel.saveData(offlineTask: OfflineTask().fetchFromTaskModel(sourceArray: tasks))
             taskArray = tasks
             
@@ -48,8 +49,17 @@ class HomeVC: UIViewController {
             refreshControl.endRefreshing()
             tableView.reloadData()
             
-        } onFailure: { error in
+            
+        } onFailure: { [self] error in
             print(error)
+            let tasks = OfflineTask().pushToTaskModel(sourceArray: RealmViewModel().fetchedData())
+            
+            taskArray = tasks
+            taskTableViewModel.update(with: tasks)
+            hideActivityIndicator()
+            refreshControl.endRefreshing()
+            tableView.reloadData()
+            
         }
     }
     
