@@ -19,6 +19,8 @@ class HomeVC: UIViewController {
     private var taskArray = [Task]()
     private var filteredTaskArray = [Task]()
     
+    @IBOutlet weak var networkStatus: UIBarButtonItem!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         print("running")
@@ -48,7 +50,7 @@ class HomeVC: UIViewController {
             hideActivityIndicator()
             refreshControl.endRefreshing()
             tableView.reloadData()
-            
+            networkStatus.title = ""
             
         } onFailure: { [self] error in
             print(error)
@@ -59,7 +61,7 @@ class HomeVC: UIViewController {
             hideActivityIndicator()
             refreshControl.endRefreshing()
             tableView.reloadData()
-            
+            networkStatus.title = "Offline!"
         }
     }
     

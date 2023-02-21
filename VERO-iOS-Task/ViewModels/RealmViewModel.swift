@@ -36,7 +36,6 @@ struct RealmViewModel {
         do {
             try realm.write {
                 realm.delete(fetchedData())
-                print("deleted")
             }
         }catch let error as NSError {
             print(error)

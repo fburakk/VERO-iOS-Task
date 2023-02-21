@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="9Ag-QX-Xmo">
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
@@ -8,7 +8,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--HomeVC-->
+        <!--VERO-iOS-Task-->
         <scene sceneID="tne-QT-ifu">
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="HomeVC" customModule="VERO_iOS_Task" customModuleProvider="target" sceneMemberID="viewController">
@@ -17,7 +17,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="Vc1-ym-7Ba">
-                                <rect key="frame" x="0.0" y="103" width="375" height="675"/>
+                                <rect key="frame" x="0.0" y="147" width="375" height="631"/>
                                 <color key="backgroundColor" red="1" green="0.99828090469042463" blue="0.99531155824661255" alpha="1" colorSpace="calibratedRGB"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="taskCell" rowHeight="89" id="shj-lX-BXF" customClass="TaskCell" customModule="VERO_iOS_Task" customModuleProvider="target">
@@ -72,7 +72,7 @@
                                 </prototypes>
                             </tableView>
                             <searchBar contentMode="redraw" placeholder="Search" showsCancelButton="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Iku-yI-aQC">
-                                <rect key="frame" x="0.0" y="47" width="375" height="56"/>
+                                <rect key="frame" x="0.0" y="91" width="375" height="56"/>
                                 <textInputTraits key="textInputTraits" returnKeyType="search"/>
                                 <connections>
                                     <outlet property="delegate" destination="BYZ-38-t0r" id="Eoe-tW-NTr"/>
@@ -91,12 +91,36 @@
                             <constraint firstItem="Vc1-ym-7Ba" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="prx-Eo-kQU"/>
                         </constraints>
                     </view>
+                    <navigationItem key="navigationItem" title="VERO-iOS-Task" id="R20-3S-oiH">
+                        <barButtonItem key="rightBarButtonItem" id="M9N-6r-Nqv">
+                            <color key="tintColor" systemColor="systemRedColor"/>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
+                        <outlet property="networkStatus" destination="M9N-6r-Nqv" id="WVX-ed-j0o"/>
                         <outlet property="searchBar" destination="Iku-yI-aQC" id="OgR-36-gcb"/>
                         <outlet property="tableView" destination="Vc1-ym-7Ba" id="LCj-45-5hj"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1068" y="3.6945812807881775"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="ymF-mN-gil">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="9Ag-QX-Xmo" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="SRJ-G9-5DE">
+                        <rect key="frame" x="0.0" y="47" width="375" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="zXj-JD-BpV"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="lX4-a8-4jm" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="125.59999999999999" y="3.6945812807881775"/>
         </scene>
@@ -104,6 +128,9 @@
     <resources>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemRedColor">
+            <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
