@@ -12,4 +12,8 @@ struct K {
     struct TaskTableView {
         static var cellID = "taskCell"
     }
+    struct NotificationCenter {
+        static var qrScanned = "qrScanned"
+    }
 }
+

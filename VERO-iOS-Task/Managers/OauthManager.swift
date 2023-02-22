@@ -21,7 +21,6 @@ struct Oauth: Codable {
 class OauthManager {
     
     static var shared = OauthManager()
-    
     private init() {}
     
     func isTokenValid(completion: @escaping (String) -> Void) {

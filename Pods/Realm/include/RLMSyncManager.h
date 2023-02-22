@@ -66,6 +66,7 @@ typedef void(^RLMSyncErrorReportingBlock)(NSError *, RLMSyncSession * _Nullable)
  A manager which serves as a central point for sync-related configuration.
  */
 RLM_SWIFT_SENDABLE RLM_FINAL // is internally thread-safe
+API_AVAILABLE(ios(10.0))
 @interface RLMSyncManager : NSObject
 
 /**

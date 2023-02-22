@@ -73,7 +73,11 @@
                             </tableView>
                             <searchBar contentMode="redraw" placeholder="Search" showsCancelButton="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Iku-yI-aQC">
                                 <rect key="frame" x="0.0" y="91" width="375" height="56"/>
-                                <textInputTraits key="textInputTraits" returnKeyType="search"/>
+                                <textInputTraits key="textInputTraits" autocorrectionType="no" returnKeyType="search"/>
+                                <scopeButtonTitles>
+                                    <string>Title</string>
+                                    <string>Title</string>
+                                </scopeButtonTitles>
                                 <connections>
                                     <outlet property="delegate" destination="BYZ-38-t0r" id="Eoe-tW-NTr"/>
                                 </connections>
@@ -92,6 +96,11 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="VERO-iOS-Task" id="R20-3S-oiH">
+                        <barButtonItem key="leftBarButtonItem" image="qrcode.viewfinder" catalog="system" id="1pf-G2-Yrk">
+                            <connections>
+                                <segue destination="ZMg-LZ-Z6O" kind="showDetail" id="x7c-Jl-bob"/>
+                            </connections>
+                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" id="M9N-6r-Nqv">
                             <color key="tintColor" systemColor="systemRedColor"/>
                         </barButtonItem>
@@ -105,6 +114,22 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1068" y="3.6945812807881775"/>
+        </scene>
+        <!--ScannerVC-->
+        <scene sceneID="TnD-yp-kt7">
+            <objects>
+                <viewController id="ZMg-LZ-Z6O" customClass="QRScannerVC" customModule="VERO_iOS_Task" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="LgM-Y3-kng">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="755"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="ey8-91-20e"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="3OI-7T-6zj"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="BGn-Mb-RRa" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1068" y="-663"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="ymF-mN-gil">
@@ -126,6 +151,7 @@
         </scene>
     </scenes>
     <resources>
+        <image name="qrcode.viewfinder" catalog="system" width="128" height="115"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

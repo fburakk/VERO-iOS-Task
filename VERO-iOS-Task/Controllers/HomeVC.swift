@@ -7,19 +7,22 @@
 
 import UIKit
 
-class HomeVC: UIViewController {
+class HomeVC: UIViewController{
 
     @IBOutlet weak var tableView: UITableView!
+    
     private let taskTableViewModel = TaskTableViewModel()
     private let realmViewModel = RealmViewModel()
+    private let refreshControl = UIRefreshControl()
     
     @IBOutlet weak var searchBar: UISearchBar!
     
-    let refreshControl = UIRefreshControl()
     private var taskArray = [Task]()
     private var filteredTaskArray = [Task]()
     
     @IBOutlet weak var networkStatus: UIBarButtonItem!
+    
+    var scannedQR = "hh"
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,7 +34,6 @@ class HomeVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         showActivityIndicator()
         fetchData()
-        
     }
     
     func delegation() {
@@ -75,6 +77,7 @@ class HomeVC: UIViewController {
         print("reolading")
         fetchData()
     }
+    
 }
 
 extension HomeVC: UISearchBarDelegate {
