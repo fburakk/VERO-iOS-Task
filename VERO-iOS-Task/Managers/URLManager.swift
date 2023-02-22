@@ -8,6 +8,7 @@
 import Foundation
 import Alamofire
 
+//URL Endpoint protocol
 protocol Endpoint {
     var httpMethod: HTTPMethod { get }
     var baseURLString: String { get }
@@ -17,13 +18,14 @@ protocol Endpoint {
     var encoder: ParameterEncoder? { get }
 }
 
+//Extension for fully url
 extension Endpoint {
-    
     var url: String {
         return baseURLString + path
     }
 }
 
+//Cases for different URLs
 enum EndpointCases: Endpoint {
     case getToken
     case getTask(token:String)

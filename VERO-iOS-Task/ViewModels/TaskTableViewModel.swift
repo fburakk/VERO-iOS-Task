@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-
+//TableView Delegate
 protocol TaskTableViewModelDelegate {
     func update(with task:[Task]?)
 }
@@ -36,7 +36,6 @@ class TaskTableViewModel: NSObject {
 extension TaskTableViewModel: UITableViewDelegate,UITableViewDataSource {}
 
 extension TaskTableViewModel: TaskTableViewModelDelegate {
-    
     func update(with task: [Task]?) {
         tasks = task
     }

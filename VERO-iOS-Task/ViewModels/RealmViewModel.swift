@@ -9,7 +9,7 @@ import Foundation
 import RealmSwift
 
 struct RealmViewModel {
-    
+    //Save downloaded data from API
     func saveData(offlineTask:[OfflineTask]) {
         let realm = try! Realm()
         
@@ -21,7 +21,7 @@ struct RealmViewModel {
             print(error)
         }
     }
-    
+    //Get saved data from database
     func fetchedData() -> [OfflineTask]{
         let realm = try! Realm()
         let offline = realm.objects(OfflineTask.self)
@@ -29,7 +29,7 @@ struct RealmViewModel {
         return Array(offline)
     }
     
-    // Delete game data
+    // Delete all datas from database
     func deleteData() {
         let realm = try! Realm()
         

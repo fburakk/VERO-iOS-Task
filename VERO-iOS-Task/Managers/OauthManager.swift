@@ -19,10 +19,11 @@ struct Oauth: Codable {
 }
 
 class OauthManager {
-    
+    //Singleton
     static var shared = OauthManager()
     private init() {}
     
+    //Getting previous token if its valid otherwise getting new token
     func isTokenValid(completion: @escaping (String) -> Void) {
         
         if let expireDate = UserDefaults.standard.object(forKey: "expire") as? Date {
@@ -39,7 +40,7 @@ class OauthManager {
             }
         }
     }
-    
+    //Getting previous token from UserDefaults
     private func getCurrentToken() -> String {
         
         if let currentToken = UserDefaults.standard.object(forKey: "token") as? String {
@@ -47,7 +48,7 @@ class OauthManager {
         }
         return ""
     }
-    
+    //Getting new token and save it to UserDefaults
     private func refreshToken(completion: @escaping (String) -> Void)  {
         
         WebManager.shared.makeRequest(endpoint: EndpointCases.getToken, Type: LoginResponse.self) { response in

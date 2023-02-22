@@ -8,7 +8,7 @@
 import UIKit
 
 class HomeVC: UIViewController{
-
+    
     @IBOutlet weak var tableView: UITableView!
     
     private let taskTableViewModel = TaskTableViewModel()
@@ -24,28 +24,28 @@ class HomeVC: UIViewController{
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("running")
         delegation()
         createRefresh()
     }
-    
+    //MARK: -ViewWillAppear
     override func viewWillAppear(_ animated: Bool) {
+        //Getting scanned text from QRScanner and search it
         NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: K.NotificationCenter.qrScanned), object: nil, queue: nil) { [self] notification in
             if let userInfo = notification.userInfo, let text = userInfo["text"] as? String {
                 searchBar.text = text
                 searchTypedText()
             }
         }
-        
         showActivityIndicator()
         fetchData()
     }
-    
+    //MARK: -TableView delegations
     private func delegation() {
         tableView.delegate = taskTableViewModel
         tableView.dataSource = taskTableViewModel
     }
     
+    //MARK: -Getting data from server
     private func fetchData() {
         
         WebManager.shared.fetchData { [self] tasks in
@@ -71,24 +71,24 @@ class HomeVC: UIViewController{
             networkStatus.title = "Offline!"
         }
     }
-    
-    func createRefresh() {
+    //MARK: -Pull2Refresh
+    private func createRefresh() {
         refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
         refreshControl.addTarget(self, action: #selector(self.refresh(_:)), for: .valueChanged)
         tableView.addSubview(refreshControl)
     }
     
     @objc func refresh(_ sender: AnyObject) {
-        print("reolading")
         fetchData()
     }
     
 }
 
+//MARK: -SearchBar Extension
 extension HomeVC: UISearchBarDelegate {
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-       searchTypedText()
+        searchTypedText()
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
@@ -99,7 +99,7 @@ extension HomeVC: UISearchBarDelegate {
         view.endEditing(true)
     }
     
-    func searchTypedText() {
+    private func searchTypedText() {
         guard let text = searchBar.text else {
             return
         }
