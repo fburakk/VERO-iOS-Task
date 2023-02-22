@@ -22,8 +22,6 @@ class HomeVC: UIViewController{
     
     @IBOutlet weak var networkStatus: UIBarButtonItem!
     
-    var scannedQR = "hh"
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         print("running")
@@ -32,16 +30,23 @@ class HomeVC: UIViewController{
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: K.NotificationCenter.qrScanned), object: nil, queue: nil) { [self] notification in
+            if let userInfo = notification.userInfo, let text = userInfo["text"] as? String {
+                searchBar.text = text
+                searchTypedText()
+            }
+        }
+        
         showActivityIndicator()
         fetchData()
     }
     
-    func delegation() {
+    private func delegation() {
         tableView.delegate = taskTableViewModel
         tableView.dataSource = taskTableViewModel
     }
     
-    func fetchData() {
+    private func fetchData() {
         
         WebManager.shared.fetchData { [self] tasks in
             realmViewModel.deleteData()
@@ -83,10 +88,21 @@ class HomeVC: UIViewController{
 extension HomeVC: UISearchBarDelegate {
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+       searchTypedText()
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        view.endEditing(true)
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        view.endEditing(true)
+    }
+    
+    func searchTypedText() {
         guard let text = searchBar.text else {
             return
         }
-        
         filteredTaskArray = taskArray.filter({ tasks in
             if let title = tasks.title, let task = tasks.task, let desc = tasks.description {
                 if title.contains(text) || task.contains(text) || desc.contains(text) {
@@ -99,17 +115,8 @@ extension HomeVC: UISearchBarDelegate {
         if text.count == 0 {
             filteredTaskArray = taskArray
         }
-        
         taskTableViewModel.update(with: filteredTaskArray)
         tableView.reloadData()
-    }
-    
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        view.endEditing(true)
-    }
-    
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        view.endEditing(true)
     }
     
 }

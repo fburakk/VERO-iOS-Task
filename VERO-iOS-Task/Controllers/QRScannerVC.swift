@@ -85,15 +85,15 @@ class QRScannerVC: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
             guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
             guard let stringValue = readableObject.stringValue else { return }
             AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
-            found(code: stringValue)
+            found(text: stringValue)
         }
 
         dismiss(animated: true)
     }
 
-    func found(code: String) {
-        print(code)
-       
+    func found(text: String) {
+        let userInfo = ["text": text]
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: K.NotificationCenter.qrScanned), object: nil, userInfo: userInfo)
     }
 
     override var prefersStatusBarHidden: Bool {
