@@ -1,3 +1,13 @@
+Used tech: - Alamofire
+
+Used pattern: - MVVM
+
+Preview;
+
+https://user-images.githubusercontent.com/88562078/221004882-9c9292b2-afb3-4496-9a3a-85b582d3b421.mp4
+ 
+ 
+------------------------------------------
 Hello dear iOS dev prospect!
 
 This repository is supposed to act as a playground for your submission.
