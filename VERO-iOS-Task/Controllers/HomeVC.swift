@@ -48,27 +48,31 @@ class HomeVC: UIViewController{
     //MARK: -Getting data from server
     private func fetchData() {
         
-        WebManager.shared.fetchData { [self] tasks in
-            realmViewModel.deleteData()
-            realmViewModel.saveData(offlineTask: OfflineTask().fetchFromTaskModel(sourceArray: tasks))
-            taskArray = tasks
-            
-            taskTableViewModel.update(with: tasks)
-            hideActivityIndicator()
-            refreshControl.endRefreshing()
-            tableView.reloadData()
-            networkStatus.title = ""
-            
-        } onFailure: { [self] error in
-            let tasks = OfflineTask().pushToTaskModel(sourceArray: RealmViewModel().fetchedData())
-            
-            taskArray = tasks
-            taskTableViewModel.update(with: tasks)
-            hideActivityIndicator()
-            refreshControl.endRefreshing()
-            tableView.reloadData()
-            networkStatus.title = "Offline!"
+        WebManager.shared.fetchData { [self] result in
+            switch result {
+            case .success(let tasks):
+                realmViewModel.deleteData()
+                realmViewModel.saveData(offlineTask: OfflineTask().fetchFromTaskModel(sourceArray: tasks))
+                taskArray = tasks
+                
+                taskTableViewModel.update(with: tasks)
+                hideActivityIndicator()
+                refreshControl.endRefreshing()
+                tableView.reloadData()
+                networkStatus.title = ""
+                
+            case .failure:
+                let tasks = OfflineTask().pushToTaskModel(sourceArray: RealmViewModel().fetchedData())
+                
+                taskArray = tasks
+                taskTableViewModel.update(with: tasks)
+                hideActivityIndicator()
+                refreshControl.endRefreshing()
+                tableView.reloadData()
+                networkStatus.title = "Offline!"
+            }
         }
+        
     }
     //MARK: -Pull2Refresh
     private func createRefresh() {

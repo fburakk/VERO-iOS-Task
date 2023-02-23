@@ -19,25 +19,18 @@ struct Oauth: Codable {
 }
 
 class OauthManager {
-    //Singleton
-    static var shared = OauthManager()
-    private init() {}
     
     //Getting previous token if its valid otherwise getting new token
-    func isTokenValid(completion: @escaping (String) -> Void) {
+    func isTokenValid(completion: @escaping (Result<String,Error>) -> Void) {
         
         if let expireDate = UserDefaults.standard.object(forKey: "expire") as? Date {
             if Date() < expireDate {
-                completion(getCurrentToken())
+                completion(.success(getCurrentToken()))
             } else {
-                refreshToken { newToken in
-                    completion(newToken)
-                }
+                refreshToken(completion: completion)
             }
         }else {
-            refreshToken { newToken in
-                completion(newToken)
-            }
+            refreshToken(completion: completion)
         }
     }
     //Getting previous token from UserDefaults
@@ -49,19 +42,19 @@ class OauthManager {
         return ""
     }
     //Getting new token and save it to UserDefaults
-    private func refreshToken(completion: @escaping (String) -> Void)  {
+    private func refreshToken(completion: @escaping (Result<String,Error>) -> Void)  {
         
         WebManager.shared.makeRequest(endpoint: EndpointCases.getToken, Type: LoginResponse.self) { response in
             
             switch response.result {
             case .success(let oauthResponse):
-                completion(oauthResponse.oauth.access_token)
+                completion(.success(oauthResponse.oauth.access_token))
                 
                 UserDefaults.standard.set(oauthResponse.oauth.access_token, forKey: "token")
                 UserDefaults.standard.set(Date().addingTimeInterval(1200), forKey: "expire")
                 
             case .failure(let error):
-                print(error.localizedDescription)
+                completion(.failure(error))
             }
         }
     }
