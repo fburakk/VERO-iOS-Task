@@ -10,6 +10,7 @@ import UIKit
 
 extension UIViewController {
     
+    //MARK: - Activitiy Indicator functions
     func showActivityIndicator() {
         let activityIndicator = UIActivityIndicatorView(style: .large)
         activityIndicator.center = self.view.center
@@ -22,5 +23,13 @@ extension UIViewController {
             activityIndicator.stopAnimating()
             activityIndicator.removeFromSuperview()
         }
+    }
+    //MARK: - Alert functions
+    
+    func makeAlert(title:String,message:String,buttonText:String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let action = UIAlertAction(title: buttonText, style: .default)
+        alert.addAction(action)
+        present(alert, animated: true)
     }
 }

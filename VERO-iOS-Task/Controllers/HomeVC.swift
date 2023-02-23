@@ -60,7 +60,6 @@ class HomeVC: UIViewController{
             networkStatus.title = ""
             
         } onFailure: { [self] error in
-            print(error)
             let tasks = OfflineTask().pushToTaskModel(sourceArray: RealmViewModel().fetchedData())
             
             taskArray = tasks
