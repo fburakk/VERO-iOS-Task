@@ -1,4 +1,4 @@
-Used tech: - Alamofire
+Used tech: - Alamofire -RealmDB
 
 Used pattern: - MVVM
 
